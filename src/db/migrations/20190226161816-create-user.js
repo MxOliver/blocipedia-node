@@ -11,8 +11,10 @@ module.exports = {
       email: {
         type: Sequelize.STRING,
         allowNull: false,
-        unique: true,
-
+        unique: {
+          args: true,
+          msg: "Email address is already in use",
+        },
         validate: {
           isEmail: { msg: "must be a valid email" }
         }
