@@ -24,18 +24,18 @@
                                 <form action="/users/sign_in" method="post">
 
                                     <div class="form-label-group">
-                                        <input type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
-                                        <label for="inputEmail">Email address</label>
+                                        <label for="email">Email address</label>
+                                        <input type="email" id="inputEmail" name="email" class="form-control"  aria-describedby="emailHelp" placeholder="Email address" required autofocus>
                                         <small class="text-muted" id="emailHelp">must be a valid address</small>
                                         </div>
                               
                                     <div class="form-label-group">
-                                        <input type="password" id="inputPassword" class="form-control" placeholder="Password" required>
                                         <label for="inputPassword">Password</label>
+                                        <input type="password" id="inputPassword" name="password" class="form-control" aria-describedby="passwordHelp" placeholder="Password" required>
                                         <small class="text-muted" id="passwordHelp">must match confirmation below</small>
                                         </div>
                               
-                                        <button class="btn btn-lg btn-primary btn-block btn-login text-uppercase font-weight-bold mb-2" type="submit">Sign in</button>
+                                        <button type="submit" class="btn btn-lg btn-primary btn-block btn-login text-uppercase font-weight-bold mb-2">Sign in</button>
                                     </form>
                             </div> 
                         </div>
