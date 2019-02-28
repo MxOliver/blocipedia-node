@@ -1,6 +1,8 @@
 const wikiQueries = require("../db/queries.wikis.js");
 const User = require("../db/models").User;
 
+const Authorizer = require("../policies/application");
+
 module.exports = {
     index(req, res, next){
         wikiQueries.getAllPublicWikis((error, wikis) => {
@@ -12,7 +14,15 @@ module.exports = {
         })
     },
     new(req, res, next){
-        res.render('wikis/new');
+        const authorized = new Authorizer(req.user).new();
+
+        if(authorized){
+            res.render('wikis/new');
+        } else {
+            req.flash("notice", "You must be signed in to do that");
+            res.redirect("/wikis");
+        }
+        
     },
     create(req, res, next){
         let newWiki = {
@@ -66,7 +76,9 @@ module.exports = {
        });
     },
     destroy(req, res, next){
-        if(req.user){
+        const authorized = new Authorizer(req.user).destroy();
+
+        if(authorized){
             wikiQueries.deleteWiki(req, (err, wiki) => {
                 if(err){
                     res.redirect(error, `/wikis/${req.params.id}`);
