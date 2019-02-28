@@ -43,13 +43,17 @@ module.exports = {
         });
     },
     edit(req, res, next){
-        wikiQueries.getWiki(req.params.id, (err, wiki) => {
-            if(err || wiki == null){
-                res.redirect(404, "/wikis");
-            } else {
-                res.render("wikis/edit", {wiki});
-            }
-        });
+        if(req.user) {
+            wikiQueries.getWiki(req.params.id, (err, wiki) => {
+                if(err || wiki == null){
+                    res.redirect(404, "/wikis");
+                } else {
+                    res.render("wikis/edit", {wiki});
+                }
+            });
+        } else {
+            res.redirect(`/wikis/${req.params.id}`);
+        }
     },
     update(req, res, next){
        wikiQueries.updateWiki(req, req.body, (err, wiki) => {
@@ -62,12 +66,16 @@ module.exports = {
        });
     },
     destroy(req, res, next){
-        wikiQueries.deleteWiki(req, (err, wiki) => {
-            if(err){
-                res.redirect(error, `/wikis/${req.params.id}`);
-            } else {
-                res.redirect(303, "/wikis");
-            }
-        });
+        if(req.user){
+            wikiQueries.deleteWiki(req, (err, wiki) => {
+                if(err){
+                    res.redirect(error, `/wikis/${req.params.id}`);
+                } else {
+                    res.redirect(303, "/wikis");
+                }
+            });
+        } else {
+            res.redirect(`/wikis/${req.paramd.id}`);
+        }
     }
 }
