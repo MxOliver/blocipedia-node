@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+            <% include ../static/partials/head.ejs %>
+    </head>
+
+    <body>
+        <!-- NAVIGATION -->
+        <% include ../static/partials/navbar.ejs %> 
+
+        <!-- PAGE CONTENT-->
+        <main class="container">
+            <div class="col-12 col-md-8">
+                <h1>Public Wiki List</h1>
+
+                <% wikis.forEach((wiki) => { %>
+
+                    <% if(wiki.private == false) { %>
+                        <a href="/wikis/<%= wiki.id %>"><h2><%= wiki.title %></h2></a>
+
+                <% } %>
+
+                <% }) %>
+            </div>
+            <div class="col-6 col-md-4">
+                <% if(currentUser) { %>
+                        <a href="/wikis/new" class="btn btn-success">Create Wiki</a>
+               <% } %>
+            </div>
+        </main>
+        <!--END CONTAINER-->
+            <% include ../static/partials/baseScripts.ejs %>
+    </body>
+
+</html>

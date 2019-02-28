@@ -98,17 +98,4 @@ describe("routes : users", () => {
 
   });
 
-  describe("POST /users/sign_in", () => {
-
-    it("should return a status code of 200 and set the current user", (done) => {
-
-      request.post(`${base}sign_in`, (err, res, body) => {
-          expect(res.statusCode).toBe(200);
-          expect(body).toContain("Blocipedia");
-          expect(err).toBeNull();
-          done();
-        })
-    });
-  });
-
 });

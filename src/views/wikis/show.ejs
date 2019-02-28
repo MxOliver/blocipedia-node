@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <% include ../static/partials/head.ejs %>
+    </head>
+
+    <body>
+         <!-- NAVIGATION -->
+         <% include ../static/partials/navbar.ejs %> 
+
+         <!-- PAGE CONTENT-->
+        <main class="container">
+                <h1><%= wiki.title %></h1>
+
+                <% if(currentUser) { %>
+
+                    <a href="/wikis/<%= wiki.id %>/edit" class="btn btn-warning">Edit</a>
+                    <form style="display:initial" action="/wikis/<%= wiki.id %>/destroy" method="post">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+              <%  } %>
+
+                <p><%= wiki.body %></p>
+        </main>
+          <!--END CONTAINER-->
+          <% include ../static/partials/baseScripts.ejs %>
+    </body>
+</html>
