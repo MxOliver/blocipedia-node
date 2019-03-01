@@ -4,6 +4,7 @@ const request = require("request");
 const sgMail = require('@sendgrid/mail');
 const stripe = require("stripe")(process.env.STRIPE_TEST_API_KEY);
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
+const accountController = require("./accountController");
 
 module.exports = {
     signUp(req, res, next){
@@ -32,10 +33,10 @@ module.exports = {
                 res.redirect("/users/sign_up");
             } else {
                 passport.authenticate("local")(req, res, () => {
-                req.flash("notice", "You've successfully signed in!");
-                sgMail.send(messageConfirmation);
-                res.redirect("/");
-              });
+                    req.flash("notice", "You've successfully signed in!");
+                    sgMail.send(messageConfirmation);
+                    res.redirect("/");
+                });
             }
         });
     },

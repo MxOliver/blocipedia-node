@@ -9,22 +9,25 @@
             
             <!--PAGE CONTENT-->
             <main class="container">
-              <h2>Upgrade to Premium User</h2>
-
-                <!--STRIPE PAYMENT -->
-                    <form action="/account/upgrade" method="POST">
-                            <script
-                              src="https://checkout.stripe.com/checkout.js" class="stripe-button"
-                              data-key="pk_test_7v5u71KJF0tLYqog6RzgQ8px"
-                              data-amount="1500"
-                              data-name="Blocipedia"
-                              data-description="Upgrade to Premium"
-                              data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
-                              data-locale="auto"
-                              data-zip-code="true"
-                              data-billing-address="true">
-                            </script>
-                          </form> 
+              <div class="card text-center">
+                <div class="card-body">
+                  <h5 class="card-title">Upgrade to Premium</h5>
+                  <p class="card-text">and get access to our private wiki feature.</p>
+                  <!--STRIPE PAYMENT -->
+                  <form action="/account/upgrade" method="POST">
+                    <script
+                      src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                      data-key="pk_test_7v5u71KJF0tLYqog6RzgQ8px"
+                      data-amount="1500"
+                      data-name="Blocipedia"
+                      data-description="Upgrade to Premium"
+                      data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+                      data-locale="auto"
+                      data-zip-code="true"
+                      data-billing-address="true">
+                    </script>
+                  </form> 
+                </div>
 
             </main>
 

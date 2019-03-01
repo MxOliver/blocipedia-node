@@ -1,4 +1,4 @@
-const stripe = require("stripe")(process.env.STRIPE_TEST_API_KEY);
+const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 const request = require("request");
 const passport = require("passport");
 const userQueries = require("../db/queries.users");
@@ -12,7 +12,7 @@ module.exports = {
             res.redirect("/users/sign_in");
         } else if (req.user && req.user.role == 1){
             req.flash("notice", "You are already a premium member. Do you wish to downgrade?");
-            res.redirect("/users/downgrade");
+            res.redirect("/account/downgrade");
         }
     },
     upgrade(req, res, next){
@@ -46,7 +46,7 @@ module.exports = {
         userQueries.downgradeUser(req, (err, user) => {
             if(err){
                 req.flash("error", err);
-                res.redirect("account/downgrade");
+                res.redirect("/account/downgrade");
             } else {
                 req.flash("notice", "Your account has been downgraded!");
                 res.redirect("/");
