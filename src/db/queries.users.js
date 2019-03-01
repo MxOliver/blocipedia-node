@@ -21,7 +21,7 @@ module.exports = {
         })
     },
     upgradeUser(req, callback){
-        User.update({where: {id: req.params.id}}).set({role: 1}).then((user) => {
+        User.update({role: 1}, {where: {id: req.user.id}}).then((user) => {
             callback(null, user);
         })
         .catch((err) => {
@@ -29,11 +29,11 @@ module.exports = {
         })
     },
     downgradeUser(req, callback){
-        User.update({where: {id: req.params.id}}).set({role: 0}).then((user) => {
+        User.update({role: 0}, {where: {id: req.user.id}}).then((user) => {
             callback(null, user);
         })
         .catch((err) => {
             callback(err);
         })
-    }
+    },
 }
