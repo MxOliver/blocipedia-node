@@ -1,6 +1,8 @@
 const userQueries = require("../db/queries.users.js");
 const passport = require("passport");
+const request = require("request");
 const sgMail = require('@sendgrid/mail');
+const stripe = require("stripe")(process.env.STRIPE_TEST_API_KEY);
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 module.exports = {
@@ -33,7 +35,7 @@ module.exports = {
                 req.flash("notice", "You've successfully signed in!");
                 sgMail.send(messageConfirmation);
                 res.redirect("/");
-              })
+              });
             }
         });
     },
@@ -57,4 +59,59 @@ module.exports = {
         req.flash("notice", "You've succesfully sign out!");
         res.redirect("/");
     },
+    upgradeForm(req, res, next){
+        if(req.user && req.user.role == 0){
+            res.render("/users/upgrade");
+        // } else if(!req.user) {
+        //     req.flash("notice", "You must be signed in to do that.");
+        //     res.redirect("/users/sign_in");
+        } else if (req.user && req.user.role == 1){
+            req.flash("notice", "You are already a premium member. Do you wish to downgrade?");
+            res.redirect("/users/downgrade");
+        }
+    },
+    upgrade(req, res, next){
+        const token = request.body.stripeToken;
+        (async () => {
+            const charge = await stripe.charges.create({
+                amount: 1500,
+                currency: 'usd',
+                description: 'Upgrade to Premium',
+                source: token,
+            });
+        })();
+        if(charge){
+            userQueries.upgradeUser(req, (err, user) => {
+                if(err){
+                    req.flash("error", err);
+                    res.redirect("/users/upgrade");
+                } else {
+                    req.flash("notice", "Your account has been upgraded!");
+                    res.redirect("/");
+                }
+            });
+        }
+    },
+    downgrade(req, res, next){
+        userQueries.downgradeUser(req, (err, user) => {
+            if(err){
+                req.flash("error", err);
+                res.redirect("/users/downgrade");
+            } else {
+                req.flash("notice", "Your account has been downgraded!");
+                res.redirect("/");
+            }
+        })
+    },
+    downgradeForm(req, res, next){
+        if(req.user && req.user.role == 1){
+            res.render("/users/downgrade");
+        } else if(!req.user) {
+            req.flash("notice", "You must be signed in to do that.");
+            res.redirect("/users/sign_in");
+        } else if (req.user && req.user.role == 0){
+            req.flash("notice", "You are already a standard member. Do you wish to upgrade?");
+            res.redirect("/users/upgrade");
+        }
+    }
 }

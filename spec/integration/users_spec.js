@@ -3,6 +3,7 @@ const server = require("../../src/server");
 const base = "http://localhost:3000/users/";
 const User = require("../../src/db/models").User;
 const sequelize = require("../../src/db/models/index").sequelize;
+const stripe = require("stripe")(process.env.STRIPE_TEST_API_KEY);
 
 describe("routes : users", () => {
 
@@ -94,6 +95,42 @@ describe("routes : users", () => {
         expect(body).toContain("Sign in");
         done();
       });
+    });
+
+  });
+
+  describe("GET /users/upgrade", () => {
+
+    it("should render a view with a upgrade account form", (done) => {
+      request.get(`${base}upgrade`, (err, res, body) => {
+        expect(err).toBeNull();
+        expect(body).toContain("Upgrade to Premium User");
+        done();
+      });
+      done();
+    });
+  });
+
+  describe("POST /users/upgrade", () => {
+
+    it("should change the associated users role to 1", (done) => {
+       User.create({
+         email: 'bob@example.com',
+         password: "1222222",
+         role: 0
+       }).then((user) => {
+          this.user = user;
+
+        request.post(`${base}upgrade`, (err, res, body) => {
+          expect(this.user.role).toBe(1);
+          done();
+        });
+       })
+       .catch((err) => {
+         console.log(err);
+         done();
+       })
+       done();
     });
 
   });

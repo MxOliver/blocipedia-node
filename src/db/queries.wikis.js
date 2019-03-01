@@ -2,7 +2,7 @@ const Wiki = require("./models").Wiki;
 
 module.exports = {
     getAllPublicWikis(callback){
-        return Wiki.all({where: {private: false}}).then((wikis) => {
+        return Wiki.findAll({where: {private: false}}).then((wikis) => {
             callback(null, wikis);
         })
         .catch((err) => {

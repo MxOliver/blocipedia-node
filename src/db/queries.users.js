@@ -20,4 +20,20 @@ module.exports = {
             callback(err);
         })
     },
+    upgradeUser(req, callback){
+        User.update({where: {id: req.params.id}}).set({role: 1}).then((user) => {
+            callback(null, user);
+        })
+        .catch((err) => {
+            callback(err);
+        })
+    },
+    downgradeUser(req, callback){
+        User.update({where: {id: req.params.id}}).set({role: 0}).then((user) => {
+            callback(null, user);
+        })
+        .catch((err) => {
+            callback(err);
+        })
+    }
 }

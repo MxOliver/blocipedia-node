@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+        <% include ../static/partials/head.ejs %>
+  </head> 
+        <body>
+            <!-- NAVIGATION -->
+            <% include ../static/partials/navbar.ejs %> 
+            
+            <!--PAGE CONTENT-->
+            <main class="container">
+
+                <h2>Are you sure you wish to downgrade to the standard (free) plan?</h2>
+                <form method="post" action="/users/downgrade">
+                <div class="form-group">
+                <input type="submit" value="Downgrade to Standard (Free) Plan" class="btn btn-warning"> 
+                </div>
+                </form>                
+
+            </main>
+
+    <% include ../static/partials/baseScripts.ejs %>
+    </body>
+        
+</html>   
