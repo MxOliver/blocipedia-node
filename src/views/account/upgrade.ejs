@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+        <% include ../static/partials/head.ejs %>
+  </head> 
+        <body>
+            <!-- NAVIGATION -->
+            <% include ../static/partials/navbar.ejs %> 
+            
+            <!--PAGE CONTENT-->
+            <main class="container">
+              <div class="card text-center">
+                <div class="card-body">
+                  <h5 class="card-title">Upgrade to Premium</h5>
+                  <p class="card-text">and get access to our private wiki feature.</p>
+                  <!--STRIPE PAYMENT -->
+                  <form action="/account/upgrade" method="POST">
+                    <script
+                      src="https://checkout.stripe.com/checkout.js" class="stripe-button"
+                      data-key="pk_test_7v5u71KJF0tLYqog6RzgQ8px"
+                      data-amount="1500"
+                      data-name="Blocipedia"
+                      data-description="Upgrade to Premium"
+                      data-image="https://stripe.com/img/documentation/checkout/marketplace.png"
+                      data-locale="auto"
+                      data-zip-code="true"
+                      data-billing-address="true">
+                    </script>
+                  </form> 
+                </div>
+
+            </main>
+
+    <% include ../static/partials/baseScripts.ejs %>
+    </body>
+            
+</html>

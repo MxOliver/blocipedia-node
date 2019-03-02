@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+        <% include ../static/partials/head.ejs %>
+  </head> 
+        <body>
+            <!-- NAVIGATION -->
+            <% include ../static/partials/navbar.ejs %> 
+            
+            <!--PAGE CONTENT-->
+            <main class="container">
+                <div class="card text-center">
+                    <div class="card-body">
+                    <h5 class="card-title">Return to Standard</h5>
+                    <p class="card-text">Are you sure you want to downgrade to the standard (free) plan?</p>
+                <form method="post" action="/account/downgrade">
+                <div class="form-group">
+                <input type="submit" value="Downgrade to Standard (Free) Plan" class="btn btn-warning"> 
+                </div>
+                </form>                
+
+            </main>
+
+    <% include ../static/partials/baseScripts.ejs %>
+    </body>
+        
+</html>   

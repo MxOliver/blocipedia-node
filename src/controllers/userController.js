@@ -1,5 +1,6 @@
 const userQueries = require("../db/queries.users.js");
 const passport = require("passport");
+const request = require("request");
 const sgMail = require('@sendgrid/mail');
 sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
@@ -30,10 +31,10 @@ module.exports = {
                 res.redirect("/users/sign_up");
             } else {
                 passport.authenticate("local")(req, res, () => {
-                req.flash("notice", "You've successfully signed in!");
-                sgMail.send(messageConfirmation);
-                res.redirect("/");
-              })
+                    req.flash("notice", "You've successfully signed in!");
+                    sgMail.send(messageConfirmation);
+                    res.redirect("/");
+                });
             }
         });
     },
