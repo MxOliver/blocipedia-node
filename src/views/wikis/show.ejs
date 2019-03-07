@@ -20,7 +20,17 @@
                         </form>
               <%  } %>
          
+              <% if(currentUser.role == 1 && wiki.private == false) { %>
+                <form style="display:initial" action="/wikis/<%= wiki.id %>/private" method="post">
+                    <button type="submit" class="btn btn-success">Make Private</button>
+                </form>
+            <%  } else if(currentUser.role == 1 && wiki.private == true) { %>
+                <form style="display:initial" action="/wikis/<%= wiki.id %>/public" method="post">
+                    <button type="submit" class="btn btn-primary">Make Public</button>
+                </form>
 
+            <% } %>
+            
                 <p><%= wiki.body %></p>
         </main>
           <!--END CONTAINER-->

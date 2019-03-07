@@ -2,6 +2,7 @@ const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 const request = require("request");
 const passport = require("passport");
 const userQueries = require("../db/queries.users");
+const wikiQueries = require("../db/queries.wikis");
 
 module.exports = {
     upgradeForm(req, res, next){
@@ -48,6 +49,13 @@ module.exports = {
                 req.flash("error", err);
                 res.redirect("/account/downgrade");
             } else {
+                wikiQueries.handleDowngrade(req, (err, user) => {
+                    if(err){
+                        req.flash("error", err);
+                    } else {
+                        req.flash("notice", "Your private wikis are now public");
+                    }
+                });
                 req.flash("notice", "Your account has been downgraded!");
                 res.redirect("/");
             }
@@ -62,7 +70,7 @@ module.exports = {
         } 
         else if (req.user && req.user.role == 0){
             req.flash("notice", "You are already a standard member. Do you wish to upgrade?");
-            res.redirect("account/upgrade");
+            res.redirect("/account/upgrade");
         }
     }
 }
