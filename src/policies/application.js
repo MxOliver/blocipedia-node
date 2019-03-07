@@ -5,11 +5,11 @@ module.exports = class ApplicationPolicy {
     }
 
     _isAdmin() {
-        return this.user && this.user.role == 3;
+        return this.user && this.user.role == 2;
     }
 
     _isPremium() {
-        return this.user && this.user.role == 2;
+        return this.user && this.user.role == 1;
     }
 
     new() {
@@ -33,6 +33,10 @@ module.exports = class ApplicationPolicy {
     }
 
     destroy() {
-        return this._isAdmin();
+        return this.update();
+    }
+
+    private() {
+        return (this._isAdmin() || this._isPremium());
     }
 }

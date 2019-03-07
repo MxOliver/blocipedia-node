@@ -25,21 +25,50 @@ module.exports = {
         
     },
     create(req, res, next){
-        let newWiki = {
-            title: req.body.title,
-            body: req.body.body,
-            userId: req.user.id,
-            private: false
+        status = {
+            private: req.body.private ? false : true
         }
-        if(req.user){
-            wikiQueries.addWiki(newWiki, (err, wiki) => {
+
+        console.log(status);
+
+        if(req.user && status.private == false){
+            let privateWiki = {
+                title: req.body.title,
+                body: req.body.body,
+                userId: req.user.id,
+                private: true
+            }
+            const authorized = new Authorizer(req.user).private();
+
+            if(authorized){
+                wikiQueries.addPrivateWiki(privateWiki, (err, wiki) => {
+                    if(err){
+                        req.flash("error", err);
+                    } else {
+                        console.log("yeah!");
+                        res.redirect(303, '/wikis');
+                    }
+                });
+            } else {
+                req.flash("notice", "You must be a premium user to do that");
+            }
+        } else if (req.user && status.private == true) {
+            let publicWiki = {
+                title: req.body.title,
+                body: req.body.body,
+                userId: req.user.id,
+                private: false
+            }
+            wikiQueries.addWiki(publicWiki, (err, wiki) => {
                 if(err){
+                    console.log(err);
                     req.flash("error", err);
                 } else {
+                    console.log("no error on controller");
                     res.redirect(303, '/wikis');
                 }
             });
-        } else {
+        } else if (!req.user){
             req.flash("notice", "You must be signed in to do that.");
         }
     },
@@ -89,5 +118,33 @@ module.exports = {
         } else {
             res.redirect(`/wikis/${req.paramd.id}`);
         }
-    }
+    },
+    changeToPrivate(req, res, next){
+        const authorized = new Authorizer(req.user).private();
+
+        if(authorized){
+            wikiQueries.makePrivate(req, (err, wiki) => {
+                if(err){
+                    res.redirect(error, "/wikis")
+                } else {
+                    res.redirect(`/wikis/${req.params.id}`);
+                }
+            });
+        } else {
+            req.flash("notice", "You must be a premium user to do that");
+        }
+    },
+    changeToPublic(req, res, next){
+        const authorized = new Authorizer(req.user).private();
+
+        if(authorized){
+            wikiQueries.makePublic(req, (err, wiki) => {
+                if(err){
+                    res.redirect(error, "/wikis");
+                } else {
+                    res.redirect(`/wikis/${req.params.id}`);
+                }
+            })
+        }
+    },
 }
