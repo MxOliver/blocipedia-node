@@ -1,5 +1,6 @@
 const wikiQueries = require("../db/queries.wikis.js");
 const User = require("../db/models").User;
+const markdown = require( "markdown" ).markdown;
 
 const Authorizer = require("../policies/application");
 
@@ -29,8 +30,6 @@ module.exports = {
             private: req.body.private ? false : true
         }
 
-        console.log(status);
-
         if(req.user && status.private == false){
             let privateWiki = {
                 title: req.body.title,
@@ -40,12 +39,13 @@ module.exports = {
             }
             const authorized = new Authorizer(req.user).private();
 
+            privateMarkdownWiki = markdown.toHTML(privateWiki)
+
             if(authorized){
-                wikiQueries.addPrivateWiki(privateWiki, (err, wiki) => {
+                wikiQueries.addPrivateWiki(privateMarkdownWiki, (err, wiki) => {
                     if(err){
                         req.flash("error", err);
                     } else {
-                        console.log("yeah!");
                         res.redirect(303, '/wikis');
                     }
                 });
@@ -59,7 +59,10 @@ module.exports = {
                 userId: req.user.id,
                 private: false
             }
-            wikiQueries.addWiki(publicWiki, (err, wiki) => {
+
+            publicMarkdownWiki = markdown.toHTML(publicWiki);
+
+            wikiQueries.addWiki(publicMarkdownWiki, (err, wiki) => {
                 if(err){
                     console.log(err);
                     req.flash("error", err);
