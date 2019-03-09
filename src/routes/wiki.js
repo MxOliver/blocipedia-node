@@ -19,4 +19,6 @@ router.post('/wikis/:id/private', wikiController.changeToPrivate);
 
 router.post('/wikis/:id/public', wikiController.changeToPublic);
 
+router.get("/wikis/:id/collaborators", wikiController.showCollaborators);
+
 module.exports = router;

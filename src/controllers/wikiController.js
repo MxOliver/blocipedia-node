@@ -1,6 +1,7 @@
 const wikiQueries = require("../db/queries.wikis.js");
 const User = require("../db/models").User;
-const markdown = require( "markdown" ).markdown;
+const markdown = require("markdown").markdown;
+const Collaborator = require("../db/models").Collaborator;
 
 const Authorizer = require("../policies/application");
 
@@ -150,4 +151,13 @@ module.exports = {
             })
         }
     },
+    showCollaborators(req, res, next){
+        Collaborator.findAll({where: {wikiId: req.params.id}}).then((collaborators) => {
+            res.render(`wikis/${req.params.id}/collaborators`, {collaborators});
+        })
+        .catch((err) => {
+            console.log(err);
+        })
+    },
+    
 }
