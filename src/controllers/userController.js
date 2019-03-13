@@ -32,7 +32,9 @@ module.exports = {
             } else {
                 passport.authenticate("local")(req, res, () => {
                     req.flash("notice", "You've successfully signed in!");
-                    sgMail.send(messageConfirmation);
+                    sgMail.send(messageConfirmation).catch((err) => {
+                        console.log(err);
+                    });
                     res.redirect("/");
                 });
             }

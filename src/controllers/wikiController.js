@@ -37,9 +37,12 @@ module.exports = {
                 userId: req.user.id,
                 private: true
             }
-            const authorized = new Authorizer(req.user).private();
 
+            
             privateMarkdownWiki = markdown.toHTML(privateWiki)
+           
+
+            const authorized = new Authorizer(req.user).private();
 
             if(authorized){
                 wikiQueries.addPrivateWiki(privateMarkdownWiki, (err, wiki) => {
@@ -60,7 +63,8 @@ module.exports = {
                 private: false
             }
 
-            publicMarkdownWiki = markdown.toHTML(publicWiki);
+                publicMarkdownWiki = markdown.toHTML(publicWiki);
+            
 
             wikiQueries.addWiki(publicMarkdownWiki, (err, wiki) => {
                 if(err){
