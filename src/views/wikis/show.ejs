@@ -10,10 +10,8 @@
 
          <!-- PAGE CONTENT-->
         <main class="container">
-            <script>
-             </script>
 
-                <h1><%= wiki.title %></h1>
+                <h1><%- wiki.title %></h1>
 
                 <% if(currentUser) { %>
 
@@ -35,7 +33,7 @@
 
             <% } %>
              
-                <p><%= wiki.body %></p>
+                <p><%- wiki.body %></p>
 
         </main>   
           <!--END CONTAINER-->

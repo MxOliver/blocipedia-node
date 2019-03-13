@@ -37,15 +37,12 @@ module.exports = {
                 userId: req.user.id,
                 private: true
             }
-
-            
-            privateMarkdownWiki = markdown.toHTML(privateWiki)
            
 
             const authorized = new Authorizer(req.user).private();
 
             if(authorized){
-                wikiQueries.addPrivateWiki(privateMarkdownWiki, (err, wiki) => {
+                wikiQueries.addPrivateWiki(privateWiki, (err, wiki) => {
                     if(err){
                         req.flash("error", err);
                     } else {
@@ -62,11 +59,9 @@ module.exports = {
                 userId: req.user.id,
                 private: false
             }
-
-                publicMarkdownWiki = markdown.toHTML(publicWiki);
             
 
-            wikiQueries.addWiki(publicMarkdownWiki, (err, wiki) => {
+            wikiQueries.addWiki(publicWiki, (err, wiki) => {
                 if(err){
                     console.log(err);
                     req.flash("error", err);
@@ -84,6 +79,8 @@ module.exports = {
             if(err || wiki == null){
                 res.redirect(404, "/wikis");
             } else {
+                wiki.body = markdown.toHTML(wiki.body);
+                wiki.title = markdown.toHTML(wiki.title);
                 res.render("wikis/show", {wiki});
             }
         });
@@ -94,7 +91,7 @@ module.exports = {
                 if(err || wiki == null){
                     res.redirect(404, "/wikis");
                 } else {
-                    res.render("wikis/edit", {wiki});
+                    res.render(`wikis/edit`, {wiki});
                 }
             });
         } else {
