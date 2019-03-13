@@ -23,6 +23,10 @@ module.exports = (sequelize, DataTypes) => {
       foreignKey: "userId",
       as: "wikis"
     });
+
+    User.hasOne(models.Collaborator, {
+      as: "collaborators"
+    });
   };
   return User;
 };

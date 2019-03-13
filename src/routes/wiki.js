@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const wikiController = require("../controllers/wikiController");
+const collaboratorController = require("../controllers/collaboratorController");
 
 router.get('/wikis', wikiController.index);
 
@@ -18,5 +19,8 @@ router.post('/wikis/:id/destroy', wikiController.destroy);
 router.post('/wikis/:id/private', wikiController.changeToPrivate);
 
 router.post('/wikis/:id/public', wikiController.changeToPublic);
+
+router.get('/wikis/:id/addCollaborator', collaboratorController.newCollaboratorForm);
+router.post('/wikis/:id/addCollaborator', collaboratorController.addCollaborator);
 
 module.exports = router;

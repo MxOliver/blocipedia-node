@@ -22,15 +22,15 @@
               <%  } %>
          
 
-              <% if(currentUser.role == 1 && wiki.private == false) { %>
+              <% if(currentUser && currentUser.role == 1 && wiki.private == false) { %>
                 <form style="display:initial" action="/wikis/<%= wiki.id %>/private" method="post">
                     <button type="submit" class="btn btn-success">Make Private</button>
                 </form>
-            <%  } else if(currentUser.role == 1 && wiki.private == true) { %>
+            <%  } else if(currentUser && currentUser.role == 1 && wiki.private == true) { %>
                 <form style="display:initial" action="/wikis/<%= wiki.id %>/public" method="post">
                     <button type="submit" class="btn btn-primary">Make Public</button>
                 </form>
-
+                <a href="/wikis/<%= wiki.id %>/addCollaborator" class="btn btn-success">Add Collaborators</a>
             <% } %>
              
                 <p><%- wiki.body %></p>
