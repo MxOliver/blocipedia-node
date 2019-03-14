@@ -18,7 +18,7 @@
                             <a href="/wikis/<%= wiki.id %>"><h2><%= wiki.title %></h2></a>
                   <% }) %>
 
-                  <% if(currentUser && currentUser.role == 1) { %>
+                  <% if(currentUser && currentUser.role == 1 && privateWikis) { %>
                         <% privateWikis.forEach((wiki) => { %>
 
                             <a href="/wikis/<%= wiki.id %>"><h2><%= wiki.title %></h2></a>

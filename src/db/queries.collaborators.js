@@ -44,12 +44,8 @@ module.exports = {
         })
     },
     getCollaborators(userId, callback){
-       Collaborator.findAll({where: {userId: userId}}).then((collaborators) => {
-           console.log("collaborators");
-           console.log(collaborators);
-           console.log("wikiId");
-           console.log(collaborators.wikiId);
-           callback(null, collaborators)
+       Collaborator.findAll({where: {userId: userId}}).then((collaborator) => {
+           callback(null, collaborator)
        })
        .catch((err) => {
            callback(err);

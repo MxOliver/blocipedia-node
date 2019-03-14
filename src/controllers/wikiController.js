@@ -22,18 +22,25 @@ module.exports = {
                 }
               }); 
         } else if (req.user && req.user.role == 1){
-            collaboratorQueries.getCollaborators(req.user.id, (err, privateWikis) => {
+            collaboratorQueries.getCollaborators(req.user.id, (err, collaborator) => {
                 if(err){
                     console.log(err);
                     req.flash("error", err);
                 } else {
-                    wikiQueries.getAllPublicWikis((err, wikis) => {
-                        if(err){
-                            req.flash("error", err);
-                        } else {
-                            res.render('wikis/wikis', {wikis: wikis, privateWikis: privateWikis});
-                        }
-                      }); 
+                     Wiki.findByPk(collaborator.wikiId).then((privateWikis) => {
+                         console.log(privateWikis); ///check if returning wiki
+                         console.log(collaborator); ///check if collaborator is present
+                        wikiQueries.getAllPublicWikis((err, wikis) => {
+                            if(err){
+                                req.flash("error", err);
+                            } else {
+                                res.render('wikis/wikis', {wikis: wikis, privateWikis: privateWikis});
+                            }
+                          }); 
+                     })
+                     .catch((err) => {
+                         console.log(err);
+                     })   
                 }
             });
         }   
