@@ -23,4 +23,7 @@ router.post('/wikis/:id/public', wikiController.changeToPublic);
 router.get('/wikis/:id/addCollaborator', collaboratorController.newCollaboratorForm);
 router.post('/wikis/:id/addCollaborator', collaboratorController.addCollaborator);
 
+router.get('/wikis/:id/removeCollaborator', collaboratorController.removeCollaboratorForm);
+router.post('/wikis/:id/removeCollaborator', collaboratorController.removeCollaborator);
+
 module.exports = router;

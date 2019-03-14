@@ -12,6 +12,11 @@
         <main class="container">
             <h1>Edit Wiki</h1>
             <form action="/wikis/<%= wiki.id %>/update" method="post">
+
+                <% if(currentUser && currentUser.role == 1 && wiki.private == true) { %>
+                    <a href="/wikis/<%= wiki.id %>/addCollaborator" class="btn btn-success">Add Collaborators</a>
+                    <a href="/wikis/<%= wiki.id %>/removeCollaborator" class="btn btn-danger">Remove Collaborators</a>
+              <%  } %>
                 
                 <div class="form-group">
                     <label for="title">Title</label>

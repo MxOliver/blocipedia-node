@@ -1,18 +1,42 @@
 const wikiQueries = require("../db/queries.wikis.js");
+const collaboratorQueries = require("../db/queries.collaborators.js");
 const User = require("../db/models").User;
+const Collaborator = require("../db/models").Collaborator;
+const Wiki = require("../db/models").Wiki;
 const markdown = require( "markdown" ).markdown;
 
 const Authorizer = require("../policies/application");
+const CollaboratorAuthorizer = require("../policies/collaborator");
+
 
 module.exports = {
     index(req, res, next){
-        wikiQueries.getAllPublicWikis((error, wikis) => {
-            if(error){
-                res.redirect(500, "/");
-            } else {
-                res.render("wikis/wikis", {wikis});
-            }
-        })
+        
+        if(!req.user || req.user.role == 0){
+            wikiQueries.getAllPublicWikis((err, wikis) => {
+                if(err){
+                    req.flash("error", err);
+                    res.redirect(404, "/");
+                } else {
+                    res.render('wikis/wikis', {wikis: wikis, privateWikis: null});
+                }
+              }); 
+        } else if (req.user && req.user.role == 1){
+            collaboratorQueries.getCollaborators(req.user.id, (err, privateWikis) => {
+                if(err){
+                    console.log(err);
+                    req.flash("error", err);
+                } else {
+                    wikiQueries.getAllPublicWikis((err, wikis) => {
+                        if(err){
+                            req.flash("error", err);
+                        } else {
+                            res.render('wikis/wikis', {wikis: wikis, privateWikis: privateWikis});
+                        }
+                      }); 
+                }
+            });
+        }   
     },
     new(req, res, next){
         const authorized = new Authorizer(req.user).new();
@@ -46,7 +70,7 @@ module.exports = {
                     if(err){
                         req.flash("error", err);
                     } else {
-                        res.redirect(303, '/wikis');
+                        res.redirect(303, '/wikis');   
                     }
                 });
             } else {
@@ -66,7 +90,6 @@ module.exports = {
                     console.log(err);
                     req.flash("error", err);
                 } else {
-                    console.log("no error on controller");
                     res.redirect(303, '/wikis');
                 }
             });
@@ -129,13 +152,14 @@ module.exports = {
         if(authorized){
             wikiQueries.makePrivate(req, (err, wiki) => {
                 if(err){
+                    console.log(err);
                     res.redirect(error, "/wikis")
                 } else {
                     res.redirect(`/wikis/${req.params.id}`);
                 }
             });
         } else {
-            req.flash("notice", "You must be a premium user to do that");
+            req.flash("notice", "You are not authorized to do that");
         }
     },
     changeToPublic(req, res, next){

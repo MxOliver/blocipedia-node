@@ -15,18 +15,35 @@ module.exports = (sequelize, DataTypes) => {
     role: {
       type: DataTypes.INTEGER,
       defaultValue: 0
+    },
+    name: {
+      type: DataTypes.STRING
     }
   }, {});
   User.associate = function(models) {
     // associations can be defined here
     User.hasMany(models.Wiki, {
       foreignKey: "userId",
-      as: "wikis"
+      as: "Wikis"
     });
 
     User.hasOne(models.Collaborator, {
-      as: "collaborators"
+      foreignKey: "userId",
+      as: "Collaborator"
     });
   };
+
+  User.prototype.getWikisFor = function(id){
+    return this.wikis.find((wiki) => {
+      return wiki.userId = id
+    });
+  };
+
+  User.prototype.getCollaboratorFor = function(id){
+    return this.collaborators.find((collaborator) => {
+      return collaborator.userId = id
+    });
+  };
+
   return User;
 };

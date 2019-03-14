@@ -1,4 +1,5 @@
 const Wiki = require("./models").Wiki;
+const Collaborator = require("./models").Collaborator;
 
 module.exports = {
     getAllPublicWikis(callback){

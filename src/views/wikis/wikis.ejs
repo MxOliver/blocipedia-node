@@ -11,16 +11,21 @@
         <!-- PAGE CONTENT-->
         <main class="container">
             <div class="col-12 col-md-8">
-                <h1>Public Wiki List</h1>
+                <h1>Wiki Index</h1>
 
                 <% wikis.forEach((wiki) => { %>
 
-                    <% if(wiki.private == false) { %>
-                        <a href="/wikis/<%= wiki.id %>"><h2><%= wiki.title %></h2></a>
+                            <a href="/wikis/<%= wiki.id %>"><h2><%= wiki.title %></h2></a>
+                  <% }) %>
 
-                <% } %>
+                  <% if(currentUser && currentUser.role == 1) { %>
+                        <% privateWikis.forEach((wiki) => { %>
 
-                <% }) %>
+                            <a href="/wikis/<%= wiki.id %>"><h2><%= wiki.title %></h2></a>
+
+                      <%  }) %>
+                 <% } %>
+
             </div>
             <div class="col-6 col-md-4">
                 <% if(currentUser) { %>

@@ -13,8 +13,7 @@
             <form action="/wikis/<%= wiki.id %>/addCollaborator" method="post">
 
                 <div class="form-group">
-
-                <% users.forEach((user) => { %>
+                        <% users.forEach((user) => { %>
 
                     <table class="table table-hover">
                             <thead>
@@ -27,7 +26,7 @@
                             </thead>
                             <tbody>
                                 <tr>
-                                    <th scope="row" class="count"></th>
+                                    <td class="count"></td>
                                     <td>TBD</td>
                                     <td><%= user.email %></td>
                                     <td>
