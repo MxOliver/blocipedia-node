@@ -19,11 +19,17 @@
                   <% }) %>
 
                   <% if(currentUser && currentUser.role == 1 && privateWikis) { %>
-                        <% privateWikis.forEach((wiki) => { %>
+                        <% if(privateWikis.isArray) { %>
+
+                            <% privateWikis.forEach((wiki) => { %>
 
                             <a href="/wikis/<%= wiki.id %>"><h2><%= wiki.title %></h2></a>
 
                       <%  }) %>
+
+                      <% } else { %>
+                        <a href="/wikis/<%= privateWikis.id %>"><h2><%= privateWikis.title %></h2></a>
+                    <%  } %>
                  <% } %>
 
             </div>
