@@ -4,6 +4,7 @@ module.exports = class ApplicationPolicy {
         this.user = user;
         this.record = record;
         this.collaborator = collaborator;
+        
     }
 
     _isAdmin() {

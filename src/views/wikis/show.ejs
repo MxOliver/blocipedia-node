@@ -11,6 +11,8 @@
          <!-- PAGE CONTENT-->
         <main class="container">
 
+            <% if(wiki.private == false) { %>
+
                 <h1><%- wiki.title %></h1>
 
                 <% if(currentUser) { %>
@@ -26,14 +28,32 @@
                 <form style="display:initial" action="/wikis/<%= wiki.id %>/private" method="post">
                     <button type="submit" class="btn btn-success">Make Private</button>
                 </form>
-            <%  } else if(currentUser && currentUser.role == 1 && wiki.private == true) { %>
-                <form style="display:initial" action="/wikis/<%= wiki.id %>/public" method="post">
-                    <button type="submit" class="btn btn-primary">Make Public</button>
-                </form>
             <% } %>
              
                 <p><%- wiki.body %></p>
 
+               <% } else if (wiki.private == true) { %>
+
+                <% if(currentUser && collaborator && collaborator.userId == currentUser.id ) { %>
+
+                <h1><%- wiki.title %></h1>
+
+                    <a href="/wikis/<%= wiki.id %>/edit" class="btn btn-warning">Edit</a>
+                    <form style="display:initial" action="/wikis/<%= wiki.id %>/destroy" method="post">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                        </form>
+
+                    <form style="display:initial" action="/wikis/<%= wiki.id %>/public" method="post">
+                    <button type="submit" class="btn btn-primary">Make Public</button>
+                    </form>
+             
+                <p><%- wiki.body %></p>
+
+                <% } else { %>
+                            <h2>Whoops! It looks like you are not authorized to view this wiki.</h2>
+
+                    <% } %>
+               <% } %> 
         </main>   
           <!--END CONTAINER-->
           <% include ../static/partials/baseScripts.ejs %>

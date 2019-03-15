@@ -22,25 +22,18 @@ module.exports = {
                 }
               }); 
         } else if (req.user && req.user.role == 1){
-            collaboratorQueries.getCollaborators(req.user.id, (err, collaborator) => {
+            collaboratorQueries.getCollaborators(req.user.id, (err, collaborators) => {
                 if(err){
                     console.log(err);
                     req.flash("error", err);
                 } else {
-                     Wiki.findByPk(collaborator.wikiId).then((privateWikis) => {
-                         console.log(privateWikis); ///check if returning wiki
-                         console.log(collaborator); ///check if collaborator is present
-                        wikiQueries.getAllPublicWikis((err, wikis) => {
-                            if(err){
-                                req.flash("error", err);
-                            } else {
-                                res.render('wikis/wikis', {wikis: wikis, privateWikis: privateWikis});
-                            }
-                          }); 
-                     })
-                     .catch((err) => {
-                         console.log(err);
-                     })   
+                           wikiQueries.getAllPublicWikis((err, wikis) => {
+                               if(err){
+                                   req.flash("error", err);
+                               } else {
+                                   res.render('wikis/wikis', {wikis: wikis, collaborators: collaborators});
+                               }
+                             }); 
                 }
             });
         }   
@@ -108,18 +101,44 @@ module.exports = {
         wikiQueries.getWiki(req.params.id, (err, wiki) => {
             if(err || wiki == null){
                 res.redirect(404, "/wikis");
+            } else if(wiki.private == true){
+                    collaboratorQueries.collaboratorAccess(wiki.id, req.user.id, (err, collaborator) => {
+                        if(err || collaborator == null) {
+                            req.flash("notice", "You do not have permission to view this wiki.");
+                            res.redirect('/wikis');
+                        } else {
+                                wiki.body = markdown.toHTML(wiki.body);
+                                wiki.title = markdown.toHTML(wiki.title);
+                                res.render("wikis/show", {wiki: wiki, collaborator: collaborator});
+                        }
+                    })
             } else {
-                wiki.body = markdown.toHTML(wiki.body);
-                wiki.title = markdown.toHTML(wiki.title);
-                res.render("wikis/show", {wiki});
+                wikiQueries.getWiki(req.params.id, (err, wiki) => {
+                    if(err || wiki == null){
+                        res.redirect(404, "/wikis");
+                    } else {
+                        wiki.body = markdown.toHTML(wiki.body);
+                        wiki.title = markdown.toHTML(wiki.title);
+                        res.render("wikis/show", {wiki: wiki, collaborators: null});
+                    }
+                });
             }
-        });
+        })
     },
     edit(req, res, next){
         if(req.user) {
             wikiQueries.getWiki(req.params.id, (err, wiki) => {
                 if(err || wiki == null){
                     res.redirect(404, "/wikis");
+                } else if(wiki.private == true) {
+                    collaboratorQueries.collaboratorAccess(wiki.id, req.user.id, (err, collaborator) => {
+                        if(err || collaborator == null) {
+                            req.flash("notice", "You do not have permission to edit this wiki.");
+                            res.redirect('/wikis');
+                        } else {
+                            res.render("wikis/edit", {wiki});
+                        }
+                    })
                 } else {
                     res.render(`wikis/edit`, {wiki});
                 }
@@ -130,7 +149,6 @@ module.exports = {
     },
     update(req, res, next){
        wikiQueries.updateWiki(req, req.body, (err, wiki) => {
-
         if(err || wiki == null){
             res.redirect(401, `/wikis/${req.params.id}/edit`);
         } else {
@@ -139,19 +157,33 @@ module.exports = {
        });
     },
     destroy(req, res, next){
-        const authorized = new Authorizer(req.user).destroy();
-
-        if(authorized){
-            wikiQueries.deleteWiki(req, (err, wiki) => {
-                if(err){
-                    res.redirect(error, `/wikis/${req.params.id}`);
+        wikiQueries.getWiki(req.params.id, (err, wiki) => {
+            if(err || wiki == null){
+                req.flash("error", err);
+            } else if (wiki.private == true) {
+                collaboratorQueries.collaboratorAccess(wiki.id, req.user.id, (err, collaborator) => {
+                    if(err || collaborator == null) {
+                        req.flash("notice", "You do not have permission to delete this wiki.");
+                        res.redirect(`/wikis/${req.params.id}`);
+                    } else {
+                        res.redirect(303, '/wikis');
+                    }
+                })
+            } else {
+                const authorized = new Authorizer(req.user).destroy();
+                if(authorized){
+                    wikiQueries.deleteWiki(req, (err, wiki) => {
+                        if(err){
+                            res.redirect(error, `/wikis/${req.params.id}`);
+                        } else {
+                            res.redirect(303, "/wikis");
+                        }
+                    });
                 } else {
-                    res.redirect(303, "/wikis");
+                    res.redirect(`/wikis/${req.paramd.id}`);
                 }
-            });
-        } else {
-            res.redirect(`/wikis/${req.paramd.id}`);
-        }
+            }
+        })
     },
     changeToPrivate(req, res, next){
         const authorized = new Authorizer(req.user).private();
@@ -170,16 +202,23 @@ module.exports = {
         }
     },
     changeToPublic(req, res, next){
-        const authorized = new Authorizer(req.user).private();
+        collaboratorQueries.collaboratorAccess(req.params.id, req.user.id, (err, collaborator) => {
+            if(err || collaborator == null) {
+                req.flash("notice", "You do not have permission to edit this wiki.");
+                res.redirect('/wikis');
+            } else {
+                const authorized = new Authorizer(req.user).private();
 
-        if(authorized){
-            wikiQueries.makePublic(req, (err, wiki) => {
-                if(err){
-                    res.redirect(error, "/wikis");
-                } else {
-                    res.redirect(`/wikis/${req.params.id}`);
-                }
-            })
-        }
+                if(authorized){
+                    wikiQueries.makePublic(req, (err, wiki) => {
+                        if(err){
+                            res.redirect(error, "/wikis");
+                        } else {
+                            res.redirect(`/wikis/${req.params.id}`);
+                        }
+                    })
+                }  
+            } 
+        })
     },
 }

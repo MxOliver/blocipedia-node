@@ -10,7 +10,6 @@ module.exports = {
             User.findAll({where: {id: req.body.userId}}).then((users) => {
                 users.forEach((user) => {
                     const authorized = new Authorizer(user)._isPremium();
-                    console.log(user.role);
 
                     if(authorized) {
                         collaboratorQueries.createCollaborator(req.body.userId, req.params.id, (err, collaborator) => {

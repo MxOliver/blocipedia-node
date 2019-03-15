@@ -3,7 +3,7 @@ const ApplicationPolicy = require("./application");
 module.exports = class CollaboratorPolicy extends ApplicationPolicy {
 
     _isCollaborator() {
-        return this.collaborator && (this.collaborator.userId == this.user.id);
+       return this.collaborator;
     }
 
     showPrivate() {

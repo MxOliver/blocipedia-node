@@ -15,7 +15,7 @@ module.exports = {
         })
     },
     deleteCollaborator(userId, callback){
-        return Collaborator.findAll({where: {userId: userId}}).then((collaborator) => {
+        return Collaborator.findOne({where: {userId: userId}}).then((collaborator) => {
             collaborator.destroy().then(() => {
                 callback(null, collaborator);
             })
@@ -44,11 +44,20 @@ module.exports = {
         })
     },
     getCollaborators(userId, callback){
-       Collaborator.findAll({where: {userId: userId}}).then((collaborator) => {
-           callback(null, collaborator)
+       Collaborator.findAll({where: {userId: userId}, include: [{model: Wiki, as: "Wiki", required: true}]}).then((collaborators) => {
+            callback(null, collaborators);
+        })
+        .catch((err) => {
+            callback(err);
        })
-       .catch((err) => {
-           callback(err);
-       })
+    },
+    collaboratorAccess(wikiId, userId, callback){
+        Collaborator.findOne({where: {wikiId: wikiId, userId: userId}})
+        .then((collaborator) => {
+            callback(null, collaborator);
+        })
+        .catch((err) => {
+            callback(err);
+        })
     }
 }
