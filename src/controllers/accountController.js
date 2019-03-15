@@ -63,14 +63,14 @@ module.exports = {
     },
     downgradeForm(req, res, next){
         if(req.user && req.user.role === 1){
-            res.render("account/downgrade");
+            res.render("/account/downgrade");
         } else if(!req.user) {
             req.flash("notice", "You must be signed in to do that.");
             res.redirect("/users/sign_in");
         } 
         else if (req.user && req.user.role == 0){
             req.flash("notice", "You are already a standard member. Do you wish to upgrade?");
-            res.redirect("account/upgrade");
+            res.redirect("/account/upgrade");
         }
     }
 }
