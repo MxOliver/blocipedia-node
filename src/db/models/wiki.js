@@ -30,15 +30,6 @@ module.exports = (sequelize, DataTypes) => {
       as: "Collaborators"
     });
 
-    Wiki.afterCreate((wiki, callback) => {
-      if(wiki.private == true){
-        return models.Collaborator.create({
-          userId: wiki.userId,
-          wikiId: wiki.id
-        });
-      }
-   });
-
   };
   Wiki.prototype.getCollaboratorsFor = function(id){
     return this.collaborators.find((collaborator) => {

@@ -1,5 +1,6 @@
 const Wiki = require("./models").Wiki;
 const Collaborator = require("./models").Collaborator;
+const User = require("./models").User;
 
 module.exports = {
     getAllPublicWikis(callback){
@@ -88,4 +89,19 @@ module.exports = {
             callback(err);
         })
     },
+    getWikiOwners(user, callback){
+        Wiki.findAll({where: {private: true, userId: user}, include: [{model: User, as: "User"}]}).then((wikis) => {
+            callback(null, wikis);
+        })
+        .catch((err) => {
+            callback(err);
+        })
+    },
+    getOwner(user, wiki, callback){
+        if(user.id == wiki.userId ){
+            callback(null, user);
+        } else {
+            callback(err);
+        }
+    }
 }

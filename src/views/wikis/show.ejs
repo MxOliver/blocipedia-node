@@ -32,9 +32,9 @@
              
                 <p><%- wiki.body %></p>
 
-               <% } else if (wiki.private == true) { %>
+               <% } else if (wiki.private == true && currentUser) { %>
 
-                <% if(currentUser && collaborator && collaborator.userId == currentUser.id ) { %>
+                <% if(collaborator && (collaborator.userId == currentUser.id) || wiki.userId == currentUser.id) { %>
 
                 <h1><%- wiki.title %></h1>
 

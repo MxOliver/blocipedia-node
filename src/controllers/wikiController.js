@@ -27,13 +27,22 @@ module.exports = {
                     console.log(err);
                     req.flash("error", err);
                 } else {
-                           wikiQueries.getAllPublicWikis((err, wikis) => {
-                               if(err){
-                                   req.flash("error", err);
-                               } else {
-                                   res.render('wikis/wikis', {wikis: wikis, collaborators: collaborators});
-                               }
-                             }); 
+                    wikiQueries.getWikiOwners(req.user.id, (err, wikiOwners) => {
+                        if(err){
+                            console.log(err);
+                            req.flash("error", err);
+                        } else {
+                            console.log(wikiOwners);
+
+                            wikiQueries.getAllPublicWikis((err, wikis) => {
+                                if(err){
+                                    req.flash("error", err);
+                                } else {
+                                    res.render('wikis/wikis', {wikis: wikis, collaborators: collaborators, wikiOwners: wikiOwners});
+                                }
+                              }); 
+                        }
+                    })
                 }
             });
         }   
@@ -68,6 +77,7 @@ module.exports = {
             if(authorized){
                 wikiQueries.addPrivateWiki(privateWiki, (err, wiki) => {
                     if(err){
+                        console.log(err);
                         req.flash("error", err);
                     } else {
                         res.redirect(303, '/wikis');   
@@ -75,6 +85,7 @@ module.exports = {
                 });
             } else {
                 req.flash("notice", "You must be a premium user to do that");
+                res.redirect('/wikis/new');
             }
         } else if (req.user && status.private == true) {
             let publicWiki = {
@@ -101,51 +112,46 @@ module.exports = {
         wikiQueries.getWiki(req.params.id, (err, wiki) => {
             if(err || wiki == null){
                 res.redirect(404, "/wikis");
-            } else if(wiki.private == true){
-                    collaboratorQueries.collaboratorAccess(wiki.id, req.user.id, (err, collaborator) => {
-                        if(err || collaborator == null) {
-                            req.flash("notice", "You do not have permission to view this wiki.");
-                            res.redirect('/wikis');
-                        } else {
-                                wiki.body = markdown.toHTML(wiki.body);
-                                wiki.title = markdown.toHTML(wiki.title);
-                                res.render("wikis/show", {wiki: wiki, collaborator: collaborator});
-                        }
-                    })
-            } else {
-                wikiQueries.getWiki(req.params.id, (err, wiki) => {
-                    if(err || wiki == null){
-                        res.redirect(404, "/wikis");
+            } else if(wiki.private === false || (wiki.private == true && wiki.userId == req.user.id)){
+                    wiki.body = markdown.toHTML(wiki.body);
+                    wiki.title = markdown.toHTML(wiki.title);
+                    res.render("wikis/show", {wiki: wiki, collaborator: null});
+            } else if (wiki.private == true) {
+                collaboratorQueries.collaboratorAccess(wiki.id, req.user.id, (err, collaborator) => {
+                    if(err || collaborator == null) {
+                        req.flash("notice", "You do not have permission to view this wiki.");
+                        res.redirect('/wikis');
                     } else {
                         wiki.body = markdown.toHTML(wiki.body);
                         wiki.title = markdown.toHTML(wiki.title);
-                        res.render("wikis/show", {wiki: wiki, collaborators: null});
+                        res.render("wikis/show", {wiki: wiki, collaborator: collaborator});
                     }
-                });
+                })	
             }
         })
     },
     edit(req, res, next){
-        if(req.user) {
-            wikiQueries.getWiki(req.params.id, (err, wiki) => {
-                if(err || wiki == null){
-                    res.redirect(404, "/wikis");
-                } else if(wiki.private == true) {
-                    collaboratorQueries.collaboratorAccess(wiki.id, req.user.id, (err, collaborator) => {
-                        if(err || collaborator == null) {
-                            req.flash("notice", "You do not have permission to edit this wiki.");
-                            res.redirect('/wikis');
-                        } else {
-                            res.render("wikis/edit", {wiki});
-                        }
-                    })
-                } else {
-                    res.render(`wikis/edit`, {wiki});
-                }
-            });
-        } else {
-            res.redirect(`/wikis/${req.params.id}`);
-        }
+       if(req.user) {
+        wikiQueries.getWiki(req.params.id, (err, wiki) => {
+            if(err || wiki == null){
+                res.redirect(404, "/wikis");
+            } else if(wiki.private === false || (wiki.private == true && wiki.userId == req.user.id)){
+                    res.render("wikis/edit", {wiki});
+            } else if (wiki.private == true) {
+                collaboratorQueries.collaboratorAccess(wiki.id, req.user.id, (err, collaborator) => {
+                    if(err || collaborator == null) {
+						req.flash("notice", "You do not have permission to edit this wiki.");
+						res.redirect('/wikis');
+                    } else {
+                        res.render("wikis/edit", {wiki});
+                    }
+                })	
+            }
+        })
+       } else {
+        req.flash("notice", "You must be signed in to do that.");
+        res.redirect(`/wikis/${req.params.id}`);
+       } 
     },
     update(req, res, next){
        wikiQueries.updateWiki(req, req.body, (err, wiki) => {
@@ -157,33 +163,39 @@ module.exports = {
        });
     },
     destroy(req, res, next){
-        wikiQueries.getWiki(req.params.id, (err, wiki) => {
-            if(err || wiki == null){
-                req.flash("error", err);
-            } else if (wiki.private == true) {
-                collaboratorQueries.collaboratorAccess(wiki.id, req.user.id, (err, collaborator) => {
-                    if(err || collaborator == null) {
-                        req.flash("notice", "You do not have permission to delete this wiki.");
-                        res.redirect(`/wikis/${req.params.id}`);
-                    } else {
-                        res.redirect(303, '/wikis');
-                    }
-                })
-            } else {
-                const authorized = new Authorizer(req.user).destroy();
-                if(authorized){
-                    wikiQueries.deleteWiki(req, (err, wiki) => {
-                        if(err){
-                            res.redirect(error, `/wikis/${req.params.id}`);
+        if(req.user) {
+            wikiQueries.getWiki(req.params.id, (err, wiki) => {
+                if(err || wiki == null){
+                    res.redirect(404, "/wikis");
+                } else if(wiki.private === false || (wiki.private == true && wiki.userId == req.user.id)){
+                        wikiQueries.deleteWiki(req, (err, wiki) => {
+                             if(err){
+                                res.redirect(error, `/wikis/${req.params.id}`);
+                             } else {
+                                res.redirect(303, "/wikis");
+                             }
+                         });
+                } else if (wiki.private == true) {
+                    collaboratorQueries.collaboratorAccess(wiki.id, req.user.id, (err, collaborator) => {
+                        if(err || collaborator == null) {
+                            req.flash("notice", "You do not have permission to delete this wiki.");
+                             res.redirect(`/wikis/${req.params.id}`);
                         } else {
-                            res.redirect(303, "/wikis");
+                            wikiQueries.deleteWiki(req, (err, wiki) => {
+                                 if(err){
+                                    res.redirect(error, `/wikis/${req.params.id}`);
+                                 } else {
+                                    res.redirect(303, "/wikis");
+                                 }
+                             });
                         }
-                    });
-                } else {
-                    res.redirect(`/wikis/${req.paramd.id}`);
+                    })	
                 }
-            }
-        })
+            })
+           } else {
+            req.flash("notice", "You must be signed in to do that.");
+            res.redirect(`/wikis/${req.params.id}`);
+           } 
     },
     changeToPrivate(req, res, next){
         const authorized = new Authorizer(req.user).private();

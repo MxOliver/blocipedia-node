@@ -18,15 +18,33 @@
                             <a href="/wikis/<%= wiki.id %>"><h2><%= wiki.title %></h2></a>
                   <% }) %>
 
-                  <% if(currentUser && currentUser.role == 1 && collaborators) { %>
-                       
+                  <% if(currentUser && currentUser.role == 1 ) { %>
+
+                        <% wikiOwners.forEach((wikiOwner) => { %>
+
+
+                        <% if(collaborators || (wikiOwner.userId == currentUser.id) ) { %>
+
+                            <% if (collaborators) { %>
 
                             <% collaborators.forEach((collaborator) => { %>
 
-                            <a href="/wikis/<%= collaborator.Wiki.id %>"><h2><%= collaborator.Wiki.title %></h2></a>
+                                <a href="/wikis/<%= collaborator.Wiki.id %>"><h2><%= collaborator.Wiki.title %></h2></a>
+                            
+                                <%  }) %>
+                                
+                            <% } %>
 
-                      <%  }) %>
-                 <% } %>
+                            <% if (wikiOwners) { %>
+
+                                <a href="/wikis/<%= wikiOwner.id %>"><h2><%= wikiOwner.title %></h2></a>
+
+                            <% } %>
+                    <%  } %>
+                            
+                 <% }) %>
+
+                <% } %>
 
             </div>
             <div class="col-6 col-md-4">

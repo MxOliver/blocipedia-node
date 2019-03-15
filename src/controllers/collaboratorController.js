@@ -39,19 +39,27 @@ module.exports = {
                     console.log(err);
                     res.redirect(404, "/wikis");
                 } else {
-                    authorized = new Authorizer(req.user, wiki).editCollaborator();
-
-                    if(authorized){
-                        User.findAll().then((userList) => {
-                            res.render('wikis/addCollaborator', {wiki: wiki, users: userList});
-                        })
-                        .catch((err) => {
+                    wikiQueries.getOwner(req.user, wiki, (err, owner) => {
+                        if(err){
                             console.log(err);
-                        })
-                    } else {
-                        req.flash("notice", "You are not authorized to add collaborators to this wiki");
-                        res.redirect(`/wikis/${req.params.id}`);
-                    }
+                            req.flash("error", err);
+                        } else {
+                            authorized = new Authorizer(req.user, wiki).editCollaborator();
+
+                            if(authorized){
+                                User.findAll().then((userList) => {
+                                    res.render('wikis/addCollaborator', {wiki: wiki, users: userList, owner: owner});
+                                })
+                                .catch((err) => {
+                                    console.log(err);
+                                })
+                            } else {
+                                req.flash("notice", "You are not authorized to add collaborators to this wiki");
+                                res.redirect(`/wikis/${req.params.id}`);
+                            }
+
+                        }
+                    })                    
                 }
         });
     },
