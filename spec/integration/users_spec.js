@@ -5,7 +5,7 @@ const accountBase = "http://localhost:8000/account/";
 
 const User = require("../../src/db/models").User;
 const sequelize = require("../../src/db/models/index").sequelize;
-const stripe = require("stripe")(process.env.STRIPE_TEST_API_KEY);
+const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 
 describe("routes : users", () => {
 
@@ -113,6 +113,7 @@ describe("routes : users", () => {
     
         it("should render a view with a sign in form", (done) => {
           request.get(`${base}sign_in`, (err, res, body) => {
+            console.log("SINGING IN");
             expect(err).toBeNull();
             expect(body).toContain("Sign in");
             done();
@@ -143,15 +144,24 @@ describe("routes : users", () => {
         it("should change the associated users role to 1", (done) => {
           User.findOne({where: {id: this.standardUser.id}}).then((user) => {
 
-            const options = {
-              amount: 1500,
-              source: "pk_test_qEYTjcbaOZo2Uj5FGEA7dKnQ",
+            stripe.createToken('bank_account', {
+
+              country: 'US',
               currency: 'usd',
-              description: "Upgrade Account",
-              name: user.name
-            }
-            stripe.charges.create(options, (err, charge) => {
+              routing_number: '110000000',
+              account_number: '000123456789',
+              account_holder_name: 'Jane Doe',
+              account_holder_type: 'individual',
+            }).then((result) => {
+
+              const options = {
+                amount: 1500,
+                source: result,
+                currency: 'usd',
+                description: "Upgrade Account",
+              }
               request.post(`${accountBase}upgrade`, (err, res, body) => {
+                stripe.charges.create(options, (err, charge) => {
                 User.findOne({where: {id: this.standardUser.id}}).then((user) => {
                   expect(user.role).toBe(1);
                   done();
@@ -161,7 +171,11 @@ describe("routes : users", () => {
                 })
               });
             });
-  
+
+            }).catch((err) => {
+              console.log(err);
+              done();
+            });
           }).catch((err) => {
             console.log(err);
             done();
