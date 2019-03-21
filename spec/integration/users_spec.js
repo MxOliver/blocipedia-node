@@ -124,70 +124,50 @@ describe("routes : users", () => {
       describe("GET /account/upgrade", () => {
     
         it("should render a view with a upgrade account form", (done) => {
-          request.get(`${accountBase}upgrade`, (err, res, body) => {
-            expect(err).toBeNull();
-            expect(body).toContain("Upgrade to Premium");
-            done();
-          });
-          done();
-        });
-      });
-    
-      // describe("POST /account/upgrade", () => {
-    
-      //   it("should change the associated users role to 1", (done) => {
-      //      User.create({
-      //        email: 'bob@example.com',
-      //        password: "1222222",
-      //        role: 0
-      //      }).then((user) => {
-      //         this.user = user;
-    
-      //       request.post(`${accountBase}upgrade`, (err, res, body) => {
-      //             let options = {
-      //               amount: 1500,
-      //               source: "pk_test_qEYTjcbaOZo2Uj5FGEA7dKnQ", ///test key not sensitive information
-      //               currency: 'usd',
-      //               description: "Upgrade Account",
-      //               name: this.user.name,
-      //           }
-      //         stripe.charges.create(options, (err, charge) => {
-                
-      //         }).then((charge) => {
-      //           expect(this.user.role).toBe(1);
-      //           done();
-      //         }).catch((err) => {
-      //           console.log(err);
-      //           done();
-      //         });
-      //       });
-      //      })
-      //      .catch((err) => {
-      //        console.log(err);
-      //        done();
-      //      })
-      //      done();
-      //   });
-    
-      // });
+          User.findOne({where: {role: 0, id: this.standardUser.id}}).then(() => {
 
-      describe("GET /account/downgrade", () => {
-
-        it("should redirect to a view with the upgrade account form", (done) => {
-
-          User.findOne({where: {role: 0}}).then(() => {
-
-            request.get(`${accountBase}downgrade`, (err, res, body) => {
-
+            request.get(`${accountBase}upgrade`, (err, res, body) => {
+              expect(err).toBeNull();
               expect(body).toContain("Upgrade to Premium");
               done();
             });
-          })
-          .catch((err) => {
+          }).catch((err) => {
             console.log(err);
             done();
           })
         });
+      });
+    
+      describe("POST /account/upgrade", () => {
+    
+        it("should change the associated users role to 1", (done) => {
+          User.findOne({where: {id: this.standardUser.id}}).then((user) => {
+
+            const options = {
+              amount: 1500,
+              source: "pk_test_qEYTjcbaOZo2Uj5FGEA7dKnQ",
+              currency: 'usd',
+              description: "Upgrade Account",
+              name: user.name
+            }
+            stripe.charges.create(options, (err, charge) => {
+              request.post(`${accountBase}upgrade`, (err, res, body) => {
+                User.findOne({where: {id: this.standardUser.id}}).then((user) => {
+                  expect(user.role).toBe(1);
+                  done();
+                }).catch((err) => {
+                  console.log(err);
+                  done();
+                })
+              });
+            });
+  
+          }).catch((err) => {
+            console.log(err);
+            done();
+          });
+          });
+          
       });
     
     });
@@ -198,35 +178,14 @@ describe("routes : users", () => {
       this.premiumUser;
 
       beforeEach((done) => {
-
-        User.findOne({where: {id: this.standardUser.id}}).then((user) => {
-
-          const options = {
-            amount: 1500,
-            source: "pk_test_qEYTjcbaOZo2Uj5FGEA7dKnQ",
-            currency: 'usd',
-            description: "Upgrade Account",
-            name: user.name
-          }
-          stripe.charges.create(options, (err, charge) => {
-            request.post(`${accountBase}upgrade`, (err, res, body) => {
-              User.findOne({where: {id: this.standardUser.id}}).then((premiumUser) => {
-                this.premiumUser = premiumUser;
-                expect(this.premiumUser.role).toBe(1);
-                done();
-              }).catch((err) => {
-                console.log(err);
-                done();
-              })
-            });
-          });
-
+        User.findOne({where: {role: 1}}).then((user) => {
+          this.premiumUser = user;
+          done();
         }).catch((err) => {
           console.log(err);
           done();
-        });
-      });
-
+        })
+      })
 
       describe("GET /users/sign_in", () => {
     
@@ -240,53 +199,45 @@ describe("routes : users", () => {
     
       });
 
-      // describe("GET /account/downgrade", () => {
+      describe("GET /account/downgrade", () => {
 
-      //   it("should render a view with the downgrade account form", (done) => {
-
-      //     request.get(`${accountBase}downgrade`, (err, res, body) => {
-
-      //       expect(body).toContain("Return to Standard");
-      //       expect(err).toBeNull();
-      //       done();
-      //     })
-      //   });
-      // });
-
-      // describe("POST /account/downgrade", () => {
-        
-      //   it("should change the user role from 1 to 0", (done) => {
-      //     User.findOne({where: {role: 1}}).then((premiumUser) => {
-
-      //       request.post(`${accountBase}downgrade`, (err, res, body) => {
-      //         expect(premiumUser.role).toBe(0);
-      //         done();
-      //       })
-      //     })
-      //     .catch((err) => {
-      //       console.log(err);
-      //       done();
-      //     })
-      //   });
-      // });
-
-      describe("GET /account/upgrade", () => {
-
-        it("should redirect to a view with the downgrade account form", (done) => {
+        it("should render a view with the downgrade account form", (done) => {
 
           User.findOne({where: {role: 1}}).then((premiumUser) => {
-
-            request.get(`${accountBase}upgrade`, (err, res, body) => {
-
-              expect(body).toContain("Return to Standard");
-              done();
-            })
-          })
-          .catch((err) => {
+            request.get(`${accountBase}downgrade`, (err, res, body) => {
+                  expect(body).toContain("Return to Standard");
+                  expect(err).toBeNull();
+                  done();
+            });
+          }).catch((err) => {
             console.log(err);
             done();
-          })
-        })
+          });
+        });
+      });
+
+      describe("POST /account/downgrade", () => {
+        
+        it("should change the user role from 1 to 0", (done) => {
+          User.findOne({where: {role: 1}}).then((premiumUser) => {
+
+            expect(premiumUser.role).toBe(1);
+
+            request.post(`${accountBase}downgrade`, (err, res, body) => {
+                User.findOne({where: {id: premiumUser.id}}).then((user) => {
+                  expect(user.role).toBe(0);
+                  expect(err).toBeNull();
+                  done();
+                }).catch((err) => {
+                  console.log(err);
+                  done();
+                })
+            });
+          }).catch((err) => {
+            console.log(err);
+            done();
+          });
+        });
       });
 
     });
