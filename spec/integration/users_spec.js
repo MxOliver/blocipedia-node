@@ -2,6 +2,7 @@ const request = require("request");
 const server = require("../../src/server");
 const base = "http://localhost:8000/users/";
 const accountBase = "http://localhost:8000/account/";
+
 const User = require("../../src/db/models").User;
 const sequelize = require("../../src/db/models/index").sequelize;
 const stripe = require("stripe")(process.env.STRIPE_TEST_API_KEY);
@@ -9,48 +10,38 @@ const stripe = require("stripe")(process.env.STRIPE_TEST_API_KEY);
 describe("routes : users", () => {
 
   beforeEach((done) => {
+    this.standardUser;
 
-    sequelize.sync({force: true})
-    .then(() => {
-      done();
-    })
-    .catch((err) => {
-      console.log(err);
-      done();
-    });
+    sequelize.sync({force: true}).then(() => {
+        User.create({
+          name: "Ephrum",
+          email: "standardUser@example.com",
+          password: "124445",
+          role: 0
+        }).then((standardUser) => {
+          this.standardUser = standardUser;
 
-  });
-  ///standard user context
-    describe("Standard user performing CRUD actions", () => {
-
-      beforeEach((done) => {
-
-        this.user;
-
-        sequelize.sync({force: true})
-        .then(() => {
-          User.create({
-            name: "Bob",
-            email: "bob@example.com",
-            password: "bobspass123",
-            role: 0
-          }).then((user) => {
-            this.user = user;
-            expect(this.user.name).toBe("Bob");
-            expect(this.user.email).toBe("bob@example.com");
+          request.get({
+            url: "http://localhost:3000/auth/fake",
+            form: {
+              role: this.standardUser.role,
+              userId: this.standardUser.id,
+              email: this.standardUser.email
+            }
+          }, (err, res, body) => {
             done();
-          })
-          .catch((err) => {
-            console.log(err);
-            done();
-          })
-        })
-        .catch((err) => {
+          });
+        }).catch((err) => {
           console.log(err);
           done();
-        });
-    
-      });
+        })
+    })
+  
+    });
+
+    ///standard user context
+    describe("Standard user performing CRUD actions", () => {
+
     
       describe("GET /users/sign_up", () => {
     
@@ -61,7 +52,6 @@ describe("routes : users", () => {
             done();
           });
         });
-    
       });
     
       describe("POST /users", () => {
@@ -94,16 +84,16 @@ describe("routes : users", () => {
         });
     
         it("should not create a new user with invalid attributes and redirect", (done) => {
+
+          const options = {
+                url: base,
+                form: {
+                  email: "no",
+                  password: "123456789"
+                }
+          }
     
-          request.post(
-              {
-                  url: base,
-                  form: {
-                      email: "no",
-                      password: "123456789"
-                  }
-              },
-              (err, res, body) => {
+          request.post(options, (err, res, body) => {
                   User.findOne({where: {email: "no"}})
                   .then((user) => {
                       
@@ -143,99 +133,100 @@ describe("routes : users", () => {
         });
       });
     
-      describe("POST /account/upgrade", () => {
+      // describe("POST /account/upgrade", () => {
     
-        it("should change the associated users role to 1", (done) => {
-           User.create({
-             email: 'bob@example.com',
-             password: "1222222",
-             role: 0
-           }).then((user) => {
-              this.user = user;
+      //   it("should change the associated users role to 1", (done) => {
+      //      User.create({
+      //        email: 'bob@example.com',
+      //        password: "1222222",
+      //        role: 0
+      //      }).then((user) => {
+      //         this.user = user;
     
-            request.post(`${accountBase}upgrade`, (err, res, body) => {
-                  let options = {
-                    amount: 1500,
-                    source: "pk_test_qEYTjcbaOZo2Uj5FGEA7dKnQ", ///test key not sensitive information
-                    currency: 'usd',
-                    description: "Upgrade Account",
-                    name: this.user.name,
-                }
-              stripe.charges.create(options, (err, charge) => {
+      //       request.post(`${accountBase}upgrade`, (err, res, body) => {
+      //             let options = {
+      //               amount: 1500,
+      //               source: "pk_test_qEYTjcbaOZo2Uj5FGEA7dKnQ", ///test key not sensitive information
+      //               currency: 'usd',
+      //               description: "Upgrade Account",
+      //               name: this.user.name,
+      //           }
+      //         stripe.charges.create(options, (err, charge) => {
                 
-              }).then((charge) => {
-                expect(this.user.role).toBe(1);
-                done();
-              }).catch((err) => {
-                console.log(err);
-                done();
-              });
-            });
-           })
-           .catch((err) => {
-             console.log(err);
-             done();
-           })
-           done();
-        });
-    
-      });
-
-      // describe("GET /account/downgrade", () => {
-
-      //   it("should redirect to a view with the upgrade account form", (done) => {
-
-      //     User.findOne({where: {role: 0}}).then((standardUser) => {
-
-      //       request.get(`${accountBase}downgrade`, (err, res, body) => {
-
-      //         expect(body).toContain("Upgrade to Premium");
-      //         done();
+      //         }).then((charge) => {
+      //           expect(this.user.role).toBe(1);
+      //           done();
+      //         }).catch((err) => {
+      //           console.log(err);
+      //           done();
+      //         });
       //       });
-      //     })
-      //     .catch((err) => {
-      //       console.log(err);
-      //       done();
-      //     })
+      //      })
+      //      .catch((err) => {
+      //        console.log(err);
+      //        done();
+      //      })
+      //      done();
       //   });
-      // });
     
-    })
+      // });
+
+      describe("GET /account/downgrade", () => {
+
+        it("should redirect to a view with the upgrade account form", (done) => {
+
+          User.findOne({where: {role: 0}}).then(() => {
+
+            request.get(`${accountBase}downgrade`, (err, res, body) => {
+
+              expect(body).toContain("Upgrade to Premium");
+              done();
+            });
+          })
+          .catch((err) => {
+            console.log(err);
+            done();
+          })
+        });
+      });
+    
+    });
     ///end of standard user context
 
     describe("Premium user performing CRUD actions", () => {
 
-      this.user;
+      this.premiumUser;
 
       beforeEach((done) => {
-        User.create({
-          name: "Shirley",
-          email: "shirley@temple.com",
-          password: "1333345",
-          role: 0
-        }).then((user) => {
+
+        User.findOne({where: {id: this.standardUser.id}}).then((user) => {
+
           const options = {
             amount: 1500,
-            source: "pk_test_qEYTjcbaOZo2Uj5FGEA7dKnQ", ///test key not sensitive information
+            source: "pk_test_qEYTjcbaOZo2Uj5FGEA7dKnQ",
             currency: 'usd',
             description: "Upgrade Account",
             name: user.name
           }
+          stripe.charges.create(options, (err, charge) => {
+            request.post(`${accountBase}upgrade`, (err, res, body) => {
+              User.findOne({where: {id: this.standardUser.id}}).then((premiumUser) => {
+                this.premiumUser = premiumUser;
+                expect(this.premiumUser.role).toBe(1);
+                done();
+              }).catch((err) => {
+                console.log(err);
+                done();
+              })
+            });
+          });
 
-          request.post(`${accountBase}upgrade`, (err, res, body) => {
-
-            stripe.charges.create(options, (err, charge) => {
-              expect(user.role).toBe(1);
-              done();
-            })
-          })
         }).catch((err) => {
           console.log(err);
           done();
-        })
-        
-      
+        });
       });
+
 
       describe("GET /users/sign_in", () => {
     
