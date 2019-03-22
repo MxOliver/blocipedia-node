@@ -21,10 +21,8 @@ describe("routes : users", () => {
         }).then((standardUser) => {
           this.standardUser = standardUser;
 
-          console.log("THIS USER ID IS " +  this.standardUser.id);
-
           request.get({
-            url: "http://localhost:3000/auth/fake",
+            url: "http://localhost:8000/auth/fake",
             form: {
               role: this.standardUser.role,
               userId: this.standardUser.id,
@@ -115,7 +113,6 @@ describe("routes : users", () => {
     
         it("should render a view with a sign in form", (done) => {
           request.get(`${base}sign_in`, (err, res, body) => {
-            console.log("SIGN IN VIEW");
             expect(err).toBeNull();
             expect(body).toContain("Sign in");
             done();
@@ -127,17 +124,10 @@ describe("routes : users", () => {
       describe("GET /account/upgrade", () => {
     
         it("should render a view with a upgrade account form", (done) => {
-          User.findOne({where: {role: 0, id: this.standardUser.id}}).then((user) => {
             request.get(`${accountBase}upgrade`, (err, res, body) => {
-              expect(err).toBeNull();
               expect(body).toContain("Upgrade to Premium");
-              console.log(body);
               done();
             });
-          }).catch((err) => {
-            console.log(err);
-            done();
-          })
         });
       });
     
@@ -146,15 +136,16 @@ describe("routes : users", () => {
         it("should change the associated users role to 1", (done) => {
           User.findOne({where: {id: this.standardUser.id}}).then((user) => {
 
-            const options = {
-              amount: 1500,
-              source: "tok_visa",
-              currency: 'usd',
-              description: "Upgrade Account",
-            }
+              const options = {
+                amount: 1500,
+                customer: 'cus_EkKYiFDxBtYgja',
+                currency: 'usd',
+                description: "Upgrade Account",
+              }
               request.post(`${accountBase}upgrade`, (err, res, body) => {
+
                 stripe.charges.create(options, (err, charge) => {
-                console.log("CHARGING NOW");
+
                 User.findOne({where: {id: this.standardUser.id}}).then((user) => {
                   expect(user.role).toBe(1);
                   done();
@@ -162,18 +153,17 @@ describe("routes : users", () => {
                   console.log(err);
                   done();
                 })
-              });
+              });        
             });
-  
           }).catch((err) => {
             console.log(err);
             done();
-          });
-          });
-          
+          })
       });
     
     });
+
+  });
     ///end of standard user context
 
     describe("Premium user performing CRUD actions", () => {
@@ -244,5 +234,5 @@ describe("routes : users", () => {
       });
 
     });
-    ///end of premium user context
+ ///end of premium user context
 });
