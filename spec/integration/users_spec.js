@@ -10,9 +10,20 @@ const stripe = require("stripe")(process.env.STRIPE_API_KEY);
 describe("routes : users", () => {
 
   beforeEach((done) => {
-    this.standardUser;
 
     sequelize.sync({force: true}).then(() => {
+       done();
+    }).catch((err) => {
+      console.log(err);
+      done();
+    })
+  
+    });
+
+    ///standard user context
+    describe("Standard user performing CRUD actions", () => {
+
+      beforeEach((done) => {
         User.create({
           name: "Ephrum",
           email: "standardUser@example.com",
@@ -34,13 +45,8 @@ describe("routes : users", () => {
         }).catch((err) => {
           console.log(err);
           done();
-        })
-    })
-  
-    });
-
-    ///standard user context
-    describe("Standard user performing CRUD actions", () => {
+        });
+      });
 
     
       describe("GET /users/sign_up", () => {
@@ -136,24 +142,14 @@ describe("routes : users", () => {
         it("should change the associated users role to 1", (done) => {
           User.findOne({where: {id: this.standardUser.id}}).then((user) => {
 
-              const options = {
-                amount: 1500,
-                customer: 'cus_EkKYiFDxBtYgja',
-                currency: 'usd',
-                description: "Upgrade Account",
-              }
               request.post(`${accountBase}upgrade`, (err, res, body) => {
-
-                stripe.charges.create(options, (err, charge) => {
-
-                User.findOne({where: {id: this.standardUser.id}}).then((user) => {
-                  expect(user.role).toBe(1);
+                User.findOne({where: {id: this.standardUser.id}}).then((standardUser) => {
+                  expect(standardUser.role).toBe(1);
                   done();
                 }).catch((err) => {
                   console.log(err);
                   done();
-                })
-              });        
+                })             
             });
           }).catch((err) => {
             console.log(err);
@@ -166,19 +162,38 @@ describe("routes : users", () => {
   });
     ///end of standard user context
 
+    //PREMIUM USER CONTEXT
     describe("Premium user performing CRUD actions", () => {
 
-      this.premiumUser;
-
       beforeEach((done) => {
-        User.findOne({where: {role: 1}}).then((user) => {
-          this.premiumUser = user;
-          done();
+
+        this.premiumUser;
+
+        User.create({
+          name: "Prem User",
+          email: "premiumUser@example.com",
+          password: "1333324"
+        }).then((user) => {
+          User.findOne({where: {id: user.id}}).then(() => {
+
+            request.post(`${accountBase}upgrade`, (err, res, body) => {
+              User.findOne({where: {id: user.id}}).then((premiumdUser) => {
+                this.premiumUser = premiumdUser;
+                done();
+              }).catch((err) => {
+                console.log(err);
+                done();
+              })             
+          });
         }).catch((err) => {
           console.log(err);
           done();
-        })
+        });   
+      }).catch((err) => {
+        console.log(err);
+        done();
       })
+    });
 
       describe("GET /users/sign_in", () => {
     
@@ -212,12 +227,10 @@ describe("routes : users", () => {
       describe("POST /account/downgrade", () => {
         
         it("should change the user role from 1 to 0", (done) => {
-          User.findOne({where: {role: 1}}).then((premiumUser) => {
-
-            expect(premiumUser.role).toBe(1);
+          User.findOne({where: {role: 1}}).then((user) => {
 
             request.post(`${accountBase}downgrade`, (err, res, body) => {
-                User.findOne({where: {id: premiumUser.id}}).then((user) => {
+                User.findOne({where: {id: user.id}}).then((user) => {
                   expect(user.role).toBe(0);
                   expect(err).toBeNull();
                   done();
