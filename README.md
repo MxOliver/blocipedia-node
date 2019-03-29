@@ -16,6 +16,7 @@ Wikology is a node based application for creating and sharing wikis. As a user w
 
 To start, click sign up to create an account and then you are ready to start making and collaborating on all the public wikis. 
 
+To try out the premium account feature, [Stripe](https://stripe.com/docs/testing#cards) has a list of test payment credentials you can use such as `4242 4242 4242 4242` and any random 3 digit CVV code, use with a random fake email. 
 
 ## App Configuration
 
