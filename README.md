@@ -18,6 +18,8 @@ To start, click sign up to create an account and then you are ready to start mak
 
 To try out the premium account feature, [Stripe](https://stripe.com/docs/testing#cards) has a list of test payment credentials you can use such as `4242 4242 4242 4242` and any random 3 digit CVV code, use with a random fake email. 
 
+<img src="wiki-goose-meme.png" alt="wiki goose meme" width="250px">
+
 ## App Configuration
 
 1. CLICK `clone or download` and COPY the link
