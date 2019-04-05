@@ -26,7 +26,28 @@ To try out the premium account feature, [Stripe](https://stripe.com/docs/testing
 
 2. OPEN terminal and run `git clone <link> + (optional <custom-filename-of-your-choosing>)`
 
-3. THEN `cd` into the folder containing the source code and run `npm start`
+3. THEN `cd` into the folder containing the source code
+
+### Database Set Up
+
+4. run `sequelize db:create` + `sequelize db:migrate` (optional for testing environment: `sequelize db:create --env test` `sequelize db:migrate --env test`
+
+### API Keys
+
+5. In the root directory `touch app.env` to create a file to store your secret keys 
+
+6. You will need a [stripe API key](https://stripe.com/docs/keys) and a [sendgrid API key](https://sendgrid.com/docs/ui/account-and-settings/api-keys/) and a cookieSecret for the express session 
+
+```
+cookieSecret='enter random string here';
+export STRIPE_API_KEY='key here';
+export SENDGRIND_API_KEY='key here';
+
+```
+
+7. run `source app.env` in your terminal (there will be no response from this command)
+
+8. finally run `npm start`
 
 you should see something like this in your terminal:
 
