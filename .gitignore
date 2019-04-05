@@ -1,7 +1,2 @@
 /node_modules
 *.env
-<<<<<<< HEAD
-sendgrid.env
-=======
-app.env
->>>>>>> upgrading-account
