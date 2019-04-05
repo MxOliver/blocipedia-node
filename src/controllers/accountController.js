@@ -39,7 +39,6 @@ module.exports = {
                     });
                 } else {
                     console.log(err);
-                    console.log("REDIRECTING");
                     res.redirect("/account/upgrade");
                 }
             })
